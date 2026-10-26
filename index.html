@@ -163,9 +163,9 @@ const seedTypes=[
 {id:'aurorafruit',name:'Aurora Fruit',emoji:'🫐',cost:1650,value:3750,seconds:935,world:2},
 {id:'goldenlotus',name:'Golden Lotus',emoji:'🪷',cost:2000,value:4600,seconds:1040,world:2}
 ];
-const fresh=()=>({cash:100,inventory:{},plots:Array.from({length:10},()=>null),harvests:0,upgradeLevel:0,growUpgradeLevel:0,world2Unlocked:false,currentWorld:1,infiniteMoney:false});
+const fresh=()=>({cash:100,inventory:{},plots:Array.from({length:10},()=>null),harvests:0,upgradeLevel:0,growUpgradeLevel:0,world2Unlocked:false,currentWorld:1,infiniteMoney:false,cashBeforeTesting:null});
 let state=fresh();
-try{const saved=JSON.parse(localStorage.getItem('jedidle-save-v1'));if(saved&&Number.isFinite(saved.cash)&&Array.isArray(saved.plots)&&saved.plots.length===10)state={...fresh(),...saved,inventory:saved.inventory||{},world2Unlocked:!!saved.world2Unlocked,currentWorld:saved.currentWorld===2&&saved.world2Unlocked?2:1,infiniteMoney:!!saved.infiniteMoney};}catch(e){}
+try{const saved=JSON.parse(localStorage.getItem('jedidle-save-v1'));if(saved&&Number.isFinite(saved.cash)&&Array.isArray(saved.plots)&&saved.plots.length===10)state={...fresh(),...saved,inventory:saved.inventory||{},world2Unlocked:!!saved.world2Unlocked,currentWorld:saved.currentWorld===2&&saved.world2Unlocked?2:1,infiniteMoney:!!saved.infiniteMoney,cashBeforeTesting:Number.isFinite(saved.cashBeforeTesting)?saved.cashBeforeTesting:null};}catch(e){}
 const $=id=>document.getElementById(id);
 const save=()=>{try{localStorage.setItem('jedidle-save-v1',JSON.stringify(state));}catch(e){}};
 const money=n=>'$'+Math.floor(n).toLocaleString('en-CA');
@@ -213,11 +213,11 @@ $('switchWorld').addEventListener('click',()=>{
  worldX=0;worldY=0;applyWorld();refresh();updateWorldUI();
 });
 $('toggleInfiniteCash').addEventListener('click',()=>{
- state.infiniteMoney=!state.infiniteMoney;
- if(state.infiniteMoney)state.cash=999999999;
- refresh();updateWorldUI();toast(state.infiniteMoney?'Infinite money enabled for testing.':'Infinite money disabled.');
+ if(!state.infiniteMoney){state.cashBeforeTesting=state.cash;state.infiniteMoney=true;state.cash=999999999;}
+ else{state.infiniteMoney=false;if(Number.isFinite(state.cashBeforeTesting))state.cash=state.cashBeforeTesting;state.cashBeforeTesting=null;}
+ refresh();updateWorldUI();toast(state.infiniteMoney?'Infinite money enabled for testing.':'Infinite money disabled; restored your previous balance.');
 });
-$('testingUnlockWorld').addEventListener('click',()=>{if(unlockWorld2()){refresh();updateWorldUI();}});
+$('testingUnlockWorld').addEventListener('click',()=>{state.world2Unlocked=true;refresh();updateWorldUI();toast('World 2 unlocked for testing!');});
 
 
 const themeButtons={light:$('lightMode'),dark:$('darkMode')};
