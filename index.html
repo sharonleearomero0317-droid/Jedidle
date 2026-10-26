@@ -163,6 +163,8 @@ const upgradeTiers=[{name:'Better Market Stalls',cost:500,multiplier:1.25,descri
 const saleMultiplier=()=>upgradeTiers[state.upgradeLevel-1]?.multiplier||1;
 const growMultiplier=()=>state.growUpgradeLevel?1.25:1;
 const growthSeconds=s=>Math.ceil(s.seconds*0.85/growMultiplier());
+// Apply the shorter growth schedule to crops already planted in saved farms too.
+state.plots.forEach(p=>{if(p&&p.seed&&Number.isFinite(p.plantedAt)&&Number.isFinite(p.readyAt)){const s=crop(p.seed);if(s){const shorter=p.plantedAt+growthSeconds(s)*1000;if(shorter<p.readyAt)p.readyAt=shorter;}}});
 const salePrice=s=>Math.round(s.value*saleMultiplier());
 const cropCount=()=>Object.values(state.inventory).reduce((a,b)=>a+b,0);
 const timeLeft=p=>Math.max(0,Math.ceil((p.readyAt-Date.now())/1000));
